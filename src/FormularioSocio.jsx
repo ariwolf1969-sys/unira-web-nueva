@@ -32,13 +32,6 @@ function FormularioSocio() {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  // Función para limpiar el nombre del archivo y evitar el error de Supabase
-  const cleanFileName = (name, suffix) => {
-    const ext = name.split('.').pop();
-    const cleanName = `${Date.now()}_${suffix}.${ext}`;
-    return cleanName;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!dniFrente || !dniDorso) { setMessage('Debés subir la foto del frente y dorso del DNI.'); return; }
@@ -47,11 +40,18 @@ function FormularioSocio() {
     setMessage('');
 
     try {
-      const fileNameF = cleanFileName(dniFrente.name, 'frente');
+      // Nombres de archivo ultra seguros y limpios para evitar el error de Supabase
+      const extF = dniFrente.name.split('.').pop().toLowerCase();
+      const safeExtF = ['jpg', 'jpeg', 'png', 'webp'].includes(extF) ? extF : 'jpg';
+      const fileNameF = `${Date.now()}_frente.${safeExtF}`;
+      
       const { error: errorF } = await supabase.storage.from('dni-bucket').upload(fileNameF, dniFrente);
       if (errorF) throw errorF;
 
-      const fileNameD = cleanFileName(dniDorso.name, 'dorso');
+      const extD = dniDorso.name.split('.').pop().toLowerCase();
+      const safeExtD = ['jpg', 'jpeg', 'png', 'webp'].includes(extD) ? extD : 'jpg';
+      const fileNameD = `${Date.now()}_dorso.${safeExtD}`;
+      
       const { error: errorD } = await supabase.storage.from('dni-bucket').upload(fileNameD, dniDorso);
       if (errorD) throw errorD;
 
