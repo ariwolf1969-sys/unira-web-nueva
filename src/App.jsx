@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid } from 'recharts';
 import './App.css';
 import logo from './assets/logo.png'; 
-import FormularioSocio from './FormularioSocio'; // CONECTADO AL FORMULARIO
+import FormularioSocio from './FormularioSocio';
+import { supabase } from './supabaseClient';
 
 const Navbar = () => (
   <nav className="navbar">
@@ -22,14 +23,10 @@ const Navbar = () => (
   </nav>
 );
 
-const getLaunchDate = () => {
-  const now = new Date();
-  now.setDate(now.getDate() + 365);
-  return now;
-};
+// Contador Regresivo - Fecha fija para que no falle (1 de Diciembre de 2026)
+const launchDate = new Date('2026-12-01T00:00:00');
 
 const calculateTimeLeft = () => {
-  const launchDate = getLaunchDate();
   const now = new Date();
   const difference = launchDate - now;
   if (difference <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
@@ -44,10 +41,32 @@ const calculateTimeLeft = () => {
 // PAGINA INICIO
 const Inicio = () => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [visitas, setVisitas] = useState(863); // Iniciamos con tu base
+
   useEffect(() => {
     const timer = setTimeout(() => setTimeLeft(calculateTimeLeft()), 1000);
     return () => clearTimeout(timer);
   });
+
+  // Lógica del contador de visitas
+  useEffect(() => {
+    const countViews = async () => {
+      const hasVisited = localStorage.getItem('unira_visited');
+      const { data } = await supabase.from('site_stats').select('total_views').eq('id', 1).single();
+      
+      if (data) {
+        if (!hasVisited) {
+          localStorage.setItem('unira_visited', 'true');
+          const newCount = data.total_views + 1;
+          await supabase.from('site_stats').update({ total_views: newCount }).eq('id', 1);
+          setVisitas(newCount);
+        } else {
+          setVisitas(data.total_views);
+        }
+      }
+    };
+    countViews();
+  }, []);
 
   return (
     <div className="page-hero">
@@ -72,27 +91,26 @@ const Inicio = () => {
         </div>
 
         <div className="buttons-container">
-          {/* BOTON CORREGIDO A POSTULARSE */}
           <Link to="/postularse" className="cta-button primary">Unirme a la Cooperativa</Link>
           <a href="https://unira.vercel.app/" target="_blank" rel="noopener noreferrer" className="cta-button secondary">Ver App Demo</a>
         </div>
+
+        <div className="visit-counter">👁️ {visitas} visitas al sitio</div>
       </div>
     </div>
   );
 };
 
-// PAGINA ACERCA DE
+// ... (ACERCA DE, COOPERATIVA, FINANZAS, TRABAJA, CONTACTO - QUEDAN IGUAL, LOS PEGO DEBAJO PARA NO CORTAR)
 const AcercaDe = () => (
   <div className="page-section light-bg">
     <div className="container">
       <h1>Acerca del Proyecto: Mucho más que una App</h1>
       <p className="intro-text dark-text">Este no es un proyecto más. Es un movimiento que va a cambiar la vida de más de un millón de argentinos. Estamos construyendo la primera Super App Argentina de propiedad cooperativa, donde quienes trabajan son los verdaderos dueños.</p>
-      
       <div className="info-block full-width" style={{marginBottom: '40px'}}>
         <h3>El concepto de Super App Argentina</h3>
         <p>Actualmente, las aplicaciones móviles agrupan a más de 1.000.000 de trabajadores en Argentina. Nuestra meta inicial es reunir a apenas el 0.5% (5.000 socios) para arrancar. Comenzaremos con Teyevo, abarcando viajes en auto, moto y bicicleta, y delivery de alimentos. Pero esto es solo el inicio: en un futuro cercano incorporaremos la contratación de servicios (plomeros, electricistas, albañiles, etc.), nuestra propia billetera virtual, y muchas otras funcionalidades. Todo bajo un mismo ecosistema cooperativo.</p>
       </div>
-
       <div className="grid-2">
         <div className="info-block">
           <h3>Compras Comunitarias: El ahorro real en tu bolsillo</h3>
@@ -112,20 +130,17 @@ const AcercaDe = () => (
   </div>
 );
 
-// PAGINA COOPERATIVA
 const CooperativaPage = () => {
   const comisionData = [
     { name: 'OTRAS Apps', comision: 40 },
     { name: 'Unira (Socio)', comision: 5 },
     { name: 'Unira (Externo)', comision: 8 }
   ];
-
   return (
     <div className="page-section dark-section">
       <div className="container">
         <h1 className="light-text">En OTRAS aplicaciones te llaman "Socio", decime... ¿cuáles son tus beneficios de esa sociedad?</h1>
         <p className="subtitulo-seccion light-sub">En Unira, la palabra Socio significa ser dueño. Un socio real tiene voz, voto y reparte las ganancias. Somos REALES, no solo de palabra.</p>
-        
         <div className="grid-2">
           <div className="info-block dark-block">
             <h3>¿Qué es una Cooperativa?</h3>
@@ -143,7 +158,6 @@ const CooperativaPage = () => {
             <p style={{marginTop: '15px'}}>En Unira, <strong>nosotros somos los dueños</strong>. No hay empleador contra el cual luchar. Nos organizamos para ser dueños de la herramienta de trabajo y gestionarlo democráticamente.</p>
           </div>
         </div>
-
         <div className="chart-wrapper dark-chart">
           <h3>Comparativa de Comisiones: ¿Cuánto se quedan por cada $100.000 que facturás?</h3>
           <div style={{ width: '100%', height: 300 }}>
@@ -158,11 +172,9 @@ const CooperativaPage = () => {
           </div>
           <p className="chart-caption light-text">Mientras otras apps se quedan con el 40% (o más) de tu esfuerzo, Unira solo retiene el 5% a sus socios. Ese 5% es el motor para expandirnos, conseguir más socios, mejorar las condiciones de los conductores, financiar unidades a baja tasa, construir áreas de esparcimiento y mucho más. El 95% restante queda directamente en tu bolsillo.</p>
         </div>
-
         <div className="requisitos">
           <h3>¿Cómo ser Socio Fundador?</h3>
           <p>Aporte mensual de <strong>$30.000 ARS (Actualizables por valor UVA)</strong> durante 12 meses. Este aporte te da acceso a la comisión del 5%, talleres mecánicos y de chapa/pintura propios, compras comunitarias, financiamiento y voz y voto en la asamblea. Si no querés ser socio, podés usar la app pagando un 8% de comisión y sin acceso a los beneficios cooperativos.</p>
-          {/* BOTON CORREGIDO A POSTULARSE AQUI TAMBIEN */}
           <div style={{textAlign: 'center', marginTop: '30px'}}>
             <Link to="/postularse" className="cta-button primary">Unirme a la Cooperativa</Link>
           </div>
@@ -172,7 +184,6 @@ const CooperativaPage = () => {
   );
 };
 
-// PAGINA FINANZAS
 const FinanzasPage = () => {
   const distribucionData = [
     { name: 'Gastos Operativos', value: 116 },
@@ -180,20 +191,17 @@ const FinanzasPage = () => {
     { name: 'Expansión y Recreación', value: 384 }
   ];
   const COLORS = ['#e53e3e', '#3182ce', '#4fd1c5'];
-
   const escalabilidadData = [
     { socios: '5.000', gananciaNeta: 509, gastos: 116 },
     { socios: '10.000', gananciaNeta: 980, gastos: 250 },
     { socios: '50.000', gananciaNeta: 4800, gastos: 1400 },
     { socios: '100.000', gananciaNeta: 9500, gastos: 3000 }
   ];
-
   return (
     <div className="page-section finance-bg">
       <div className="container">
         <h1>Transparencia Financiera Total</h1>
         <p className="subtitulo-seccion dark-text">Todos los valores están expresados en Pesos Argentinos (ARS), actualizados al valor del Dólar Oficial al día de la fecha. Los aportes se ajustan por UVA para proteger el fondo contra la inflación.</p>
-        
         <div className="grid-2">
           <div className="finance-detail-card">
             <h4>Fase 1: Inversión Inicial Estimada</h4>
@@ -216,7 +224,6 @@ const FinanzasPage = () => {
             </ul>
           </div>
         </div>
-
         <div className="finance-detail-card full-width">
           <h4>Gastos Operativos Mensuales (Base 5.000 Socios)</h4>
           <p className="finance-total">$116.360.000 ARS / mes</p>
@@ -228,10 +235,8 @@ const FinanzasPage = () => {
             <li><strong>Servicios (Luz, internet, seguros):</strong> $11.000.000</li>
           </ul>
         </div>
-
         <div className="finance-note">
           <h3>Balance Año 1: ¿De dónde sale el dinero y cuánto nos queda?</h3>
-          
           <div className="balance-grid">
             <div className="balance-column haber">
               <h4>HABER (Ingresos Año 1)</h4>
@@ -247,13 +252,11 @@ const FinanzasPage = () => {
               <p className="total-balance">Total Egresos: <strong>$1.312.000.000</strong></p>
             </div>
           </div>
-
           <div className="reserva-box">
             <h4>RESERVA / SALDO A FAVOR DE LA COOPERATIVA A FIN DEL AÑO 1</h4>
             <p className="reserva-monto">$688.000.000 ARS</p>
             <p>Este dinero es el respaldo real para afrontar imprevistos y proyectar la compra de tierras para nuestros centros recreativos.</p>
           </div>
-
           <div className="chart-wrapper" style={{marginTop: '40px'}}>
             <h3 className="dark-text">Distribución mensual del 5% de comisión (5.000 socios)</h3>
             <div style={{ width: '100%', height: 400 }}>
@@ -271,10 +274,9 @@ const FinanzasPage = () => {
             </div>
             <p className="chart-caption dark-text">De los $625M mensuales: $116M Gastos, $125M Reparto a Socios, $384M Superávit.</p>
           </div>
-
           <div className="chart-wrapper" style={{marginTop: '40px'}}>
             <h3 className="dark-text">Escalabilidad Realista: Ingresos vs Estructura</h3>
-            <p className="chart-caption dark-text" style={{marginBottom: '20px'}}>Al sumar socios, crecen los ingresos pero también los gastos (más talleres, personal, servidores, mantenimiento de centros). Igual, la ganancia neta escala exponencialmente.</p>
+            <p className="chart-caption dark-text" style={{marginBottom: '20px'}}>Al sumar socios, crecen los ingresos pero también los gastos. Igual, la ganancia neta escala exponencialmente.</p>
             <div style={{ width: '100%', height: 400 }}>
               <ResponsiveContainer>
                 <BarChart data={escalabilidadData}>
@@ -289,7 +291,6 @@ const FinanzasPage = () => {
               </ResponsiveContainer>
             </div>
           </div>
-
           <div className="vision-recreativa">
             <h4>Nuestra Visión a Futuro: Centros Recreativos Propios</h4>
             <p>Con ese superávit, no solo expandiremos la app a todo el país. Comenzaremos construyendo <strong>Centros Recreativos</strong> en distintas provincias: piscinas, parrillas, juegos para niños, y canchas deportivas (fútbol, pádel, tenis). A mediano plazo, estos centros evolucionarán a complejos vacacionales casi gratuitos para los socios, y fomentaremos el intercambio de viviendas entre socios de distintas provincias.</p>
@@ -300,13 +301,11 @@ const FinanzasPage = () => {
   );
 };
 
-// PAGINA TRABAJA CON NOSOTROS
 const TrabajaConNosotros = () => (
   <div className="page-section light-bg">
     <div className="container">
       <h1>¿Querés trabajar en la Cooperativa Unira?</h1>
       <p className="intro-text dark-text">Para construir este proyecto gigante, necesitamos a los mejores profesionales. Buscamos personas comprometidas con el modelo cooperativo y que quieran crecer con nosotros desde el día cero.</p>
-      
       <div className="grid-2">
         <div className="info-block">
           <h3>Búsquedas Abiertas</h3>
@@ -331,7 +330,6 @@ const TrabajaConNosotros = () => (
   </div>
 );
 
-// PAGINA CONTACTO
 const Contacto = () => (
   <div className="page-section contact-bg">
     <div className="container">
@@ -342,21 +340,62 @@ const Contacto = () => (
   </div>
 );
 
+// FOOTER
+const Footer = () => (
+  <footer className="site-footer">
+    <div className="footer-content">
+      <div className="footer-brand">
+        <img src={logo} alt="Unira" className="footer-logo" />
+        <p>La primer super-app cooperativa de Argentina. La aplicación es de todos.</p>
+      </div>
+      <div className="footer-links">
+        <h4>Navegación</h4>
+        <ul>
+          <li><Link to="/">Inicio</Link></li>
+          <li><Link to="/acerca">Acerca de</Link></li>
+          <li><Link to="/cooperativa">Cooperativa</Link></li>
+          <li><Link to="/finanzas">Finanzas</Link></li>
+          <li><Link to="/contacto">Contacto</Link></li>
+        </ul>
+      </div>
+      <div className="footer-links">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Términos y Condiciones</a></li>
+          <li><a href="#">Política de Privacidad</a></li>
+          <li><a href="#">Política de Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div className="footer-bottom">
+      <p>© 2026 Unira. Todos los derechos reservados.</p>
+      <div className="social-icons">
+        <a href="https://www.facebook.com/groups/grupo.para.crear.nuestra.propia.aplicacion.movil" target="_blank" rel="noopener noreferrer" aria-label="Facebook">FB</a>
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a>
+        <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">TT</a>
+        <a href="https://t.me/+KyvTJJ_aZzAwNTMx" target="_blank" rel="noopener noreferrer" aria-label="Telegram">TG</a>
+      </div>
+    </div>
+  </footer>
+);
+
 
 function App() {
   return (
     <BrowserRouter>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Inicio />} />
-        <Route path="/acerca" element={<AcercaDe />} />
-        <Route path="/cooperativa" element={<CooperativaPage />} />
-        <Route path="/finanzas" element={<FinanzasPage />} />
-        <Route path="/trabaja" element={<TrabajaConNosotros />} />
-        <Route path="/contacto" element={<Contacto />} />
-        {/* RUTA DEL FORMULARIO AGREGADA */}
-        <Route path="/postularse" element={<FormularioSocio />} />
-      </Routes>
+      <div className="main-content">
+        <Routes>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/acerca" element={<AcercaDe />} />
+          <Route path="/cooperativa" element={<CooperativaPage />} />
+          <Route path="/finanzas" element={<FinanzasPage />} />
+          <Route path="/trabaja" element={<TrabajaConNosotros />} />
+          <Route path="/contacto" element={<Contacto />} />
+          <Route path="/postularse" element={<FormularioSocio />} />
+        </Routes>
+      </div>
+      <Footer />
     </BrowserRouter>
   );
 }

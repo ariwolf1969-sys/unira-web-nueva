@@ -44,12 +44,11 @@ function FormularioSocio() {
 
   const prevStep = () => setStep(step - 1);
 
-  // Función para limpiar el nombre y usarlo en el archivo de la foto
   const sanitizeName = (name) => {
     return name
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita tildes
-      .replace(/[^a-zA-Z0-9 ]/g, "") // Quita caracteres raros
-      .replace(/\s+/g, '_') // Espacios por guiones bajos
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9 ]/g, "")
+      .replace(/\s+/g, '_')
       .toLowerCase();
   };
 
@@ -61,20 +60,16 @@ function FormularioSocio() {
     setMessage('');
 
     try {
-      // Creamos un nombre de archivo basado en el nombre de la persona
       const nombreLimpio = sanitizeName(formData.nombre || 'sin_nombre');
       const fileNameF = `${Date.now()}_${nombreLimpio}_frente.jpg`;
       const fileNameD = `${Date.now()}_${nombreLimpio}_dorso.jpg`;
 
-      // Subir Frente
       const { error: errorF } = await supabase.storage.from('dni-bucket').upload(fileNameF, dniFrente);
       if (errorF) throw errorF;
 
-      // Subir Dorso
       const { error: errorD } = await supabase.storage.from('dni-bucket').upload(fileNameD, dniDorso);
       if (errorD) throw errorD;
 
-      // Obtener los enlaces públicos de las fotos para guardarlos en la tabla
       const { data: urlDataF } = supabase.storage.from('dni-bucket').getPublicUrl(fileNameF);
       const { data: urlDataD } = supabase.storage.from('dni-bucket').getPublicUrl(fileNameD);
 
@@ -85,17 +80,16 @@ function FormularioSocio() {
         }
       });
 
-      // Guardar en la base de datos con los ENLACES de las fotos
       const { error: insertError } = await supabase.from('socios_potenciales').insert([{
         ...dataToInsert,
-        dni_frente_url: urlDataF.publicUrl, // Enlace clickeable
-        dni_dorso_url: urlDataD.publicUrl,  // Enlace clickeable
+        dni_frente_url: urlDataF.publicUrl,
+        dni_dorso_url: urlDataD.publicUrl,
         verificado: false
       }]);
       
       if (insertError) throw insertError;
 
-      setMessage('¡Registro exitoso! Revisaremos tu DNI y nos pondremos en contacto.');
+      setMessage('¡Registro exitoso! Revisaremos tu DNI y nos pondremos en contacto contigo por Telegram.');
       setStep(6);
     } catch (error) {
       setMessage('Error al enviar: ' + error.message);
@@ -121,7 +115,6 @@ function FormularioSocio() {
         <div className="form-container-box">
           <form onSubmit={handleSubmit}>
             
-            {/* PASO 1: IDENTIDAD Y DNI */}
             {step === 1 && (
               <div className="form-step">
                 <div className="step-header">
@@ -146,7 +139,6 @@ function FormularioSocio() {
               </div>
             )}
 
-            {/* PASO 2: PERFIL CONDUCTOR */}
             {step === 2 && (
               <div className="form-step">
                 <div className="step-header">
@@ -169,8 +161,8 @@ function FormularioSocio() {
                   <div className="checkbox-group">
                     <label><input type="checkbox" name="apps_actuales" value="Uber" onChange={handleChange} /> Uber</label>
                     <label><input type="checkbox" name="apps_actuales" value="Didi" onChange={handleChange} /> Didi</label>
-                    <label><input type="checkbox" name="apps_actuales" value="Cabify" onChange={handleChange} /> Cabify</label>
-                    <label><input type="checkbox" name="apps_actuales" value="InDrive" onChange={handleChange} /> InDrive</label>
+                    <label><input type="checkbox" name="apps_actuelles" value="Cabify" onChange={handleChange} /> Cabify</label>
+                    <label><input type="checkbox" name="apps_actuelles" value="InDrive" onChange={handleChange} /> InDrive</label>
                   </div>
                 </div>
                 <div className="form-group"><label>Nivel de Estudios alcanzados / Conocimientos *</label><input type="text" name="nivel_estudios" value={formData.nivel_estudios} onChange={handleChange} required /></div>
@@ -183,7 +175,6 @@ function FormularioSocio() {
               </div>
             )}
 
-            {/* PASO 3: INGRESOS Y SITUACION */}
             {step === 3 && (
               <div className="form-step">
                 <div className="step-header">
@@ -226,7 +217,7 @@ function FormularioSocio() {
                     <label><input type="checkbox" name="problema_principal" value="Comisiones altas" onChange={handleChange} /> Comisiones altas</label>
                     <label><input type="checkbox" name="problema_principal" value="Tarifas bajas" onChange={handleChange} /> Tarifas bajas</label>
                     <label><input type="checkbox" name="problema_principal" value="Falta de viajes" onChange={handleChange} /> Falta de viajes</label>
-                    <label><input type="checkbox" name="problema_principal" value="Gastos del vehículo" onChange={handleChange} /> Gastos del véhicule</label>
+                    <label><input type="checkbox" name="probleme_principal" value="Gastos del véhicule" onChange={handleChange} /> Gastos del véhicule</label>
                   </div>
                 </div>
                 <div className="form-group"><label>¿Qué otro problema estás teniendo?</label><input type="text" name="otro_problema" value={formData.otro_problema} onChange={handleChange} /></div>
@@ -237,7 +228,6 @@ function FormularioSocio() {
               </div>
             )}
 
-            {/* PASO 4: EXPERIENCIA Y SEGURIDAD */}
             {step === 4 && (
               <div className="form-step">
                 <div className="step-header">
@@ -266,7 +256,7 @@ function FormularioSocio() {
                   <h4>⏱️ Tiempo perdido</h4>
                 </div>
                 <div className="form-group">
-                  <label>¿Cuánto te afecta que los pasajeros demoren en subir al vehículo? *</label>
+                  <label>¿Cuánto te afecta que los pasajeros demoren en subir al véhicule? *</label>
                   <select name="tiempo_perdido" value={formData.tiempo_perdido} onChange={handleChange} required><option value="">Seleccionar...</option><option value="Mucho">Mucho</option><option value="Bastante">Bastante</option><option value="Poco">Poco</option><option value="Nada">Nada</option></select>
                 </div>
                 <div className="form-group"><label>¿Qué solución te gustaría para este problema?</label><input type="text" name="solucion_tiempo" value={formData.solucion_tiempo} onChange={handleChange} /></div>
@@ -278,7 +268,6 @@ function FormularioSocio() {
               </div>
             )}
 
-            {/* PASO 5: COMPROMISO Y APP */}
             {step === 5 && (
               <div className="form-step">
                 <div className="step-header">
@@ -345,11 +334,10 @@ function FormularioSocio() {
               </div>
             )}
 
-            {/* PANTALLA DE ÉXITO */}
             {step === 6 && (
               <div className="form-step" style={{textAlign: 'center'}}>
                 <h2 style={{color: '#4fd1c5'}}>¡Gracias, {formData.nombre}!</h2>
-                <p style={{fontSize: '1.2rem', marginTop: '20px'}}>Hemos recibido tu solicitud completa y fotos del DNI. Nuestro equipo va a verificar tu identidad y se pondrá en contacto contigo por WhatsApp.</p>
+                <p style={{fontSize: '1.2rem', marginTop: '20px'}}>Hemos recibido tu solicitud completa y fotos del DNI. Nuestro equipo va a verificar tu identidad y se pondrá en contacto contigo por Telegram.</p>
               </div>
             )}
           </form>
