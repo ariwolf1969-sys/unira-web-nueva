@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid } from 'recharts';import './App.css';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid } from 'recharts';
+import './App.css';
 import logo from './assets/logo.png'; 
 
 const Navbar = () => (
@@ -49,13 +50,15 @@ const Inicio = () => {
 
   return (
     <div className="page-hero">
-      <div className="hero-content">
+      <div className="container">
         <div className="logos-container">
           <img src={logo} alt="Cooperativa Unira" className="hero-logo" />
           <div className="teyevo-placeholder">TEYEVO</div>
         </div>
         <h1>Tomá el control de tu trabajo. Somos Socios Reales.</h1>
         <h2>Unira es la cooperativa que crea Teyevo, la app argentina donde el dinero se queda en tu bolsillo.</h2>
+        
+        <p className="hero-description">Comisión del 5%, compras comunitarias, talleres propios y poder de decisión. El dinero se queda en Argentina y en tus bolsillos.</p>
         
         <div className="countdown-container">
           <h3>Faltan para el lanzamiento:</h3>
@@ -93,9 +96,9 @@ const AcercaDe = () => (
           <h3>Compras Comunitarias: El ahorro real en tu bolsillo</h3>
           <p>No nos limitamos a cobrar una comisión baja. El poder de la cooperativa está en la unión. Al comprar en volumen, conseguimos precios mayoristas que bajan tus costos de vida y de trabajo drásticamente.</p>
           <ul className="check-list">
-            <li><strong>Insumos vehiculos:</strong> No cuesta lo mismo un bidón de 4 litros de aceite que comprar tambores de 200 litros. Neumáticos, repuestos y lubricantes al costo.</li>
+            <li><strong>Insumos vehiculares:</strong> No cuesta lo mismo un bidón de 4 litros de aceite que comprar tambores de 200 litros. Neumáticos, repuestos y lubricantes al costo.</li>
             <li><strong>Alimentos y bienes básicos:</strong> Carne, lácteos, verduras y artículos de primera necesidad a precios de hipermercado mayorista directamente en tus galpones.</li>
-            <li><strong>Este ahorro mensual licua el aporte de socio:</strong> Lo que ahorrás en compras comunitarias supera ampliamente los $30.000 mensuales del aporte.</li>
+            <li><strong>Este ahorro mensual licúa el aporte:</strong> Lo que ahorrás en compras supera ampliamente los $30.000 del aporte de socio.</li>
           </ul>
         </div>
         <div className="info-block">
@@ -188,13 +191,13 @@ const FinanzasPage = () => {
         <div className="grid-2">
           <div className="finance-detail-card">
             <h4>Fase 1: Inversión Inicial Estimada</h4>
-            <p className="finance-total">$238.000.000 ARS</p>
+            <p className="finance-total">$398.000.000 ARS</p>
             <ul>
               <li>Desarrollo App Teyevo (Empresa de primer nivel): $50.000.000</li>
               <li>4 Galpones (Depósitos garantía y adecuación inicial): $65.000.000</li>
               <li>Equipamiento Talleres (8 grúas elevadoras + herramientas): $75.000.000</li>
               <li>Trámites Legales, INAES y Constitutivos: $8.000.000</li>
-              <li>Fondo de Caja / Imprevistos inicial: $40.000.000</li>
+              <li>Capital de Trabajo y Contingencias Inicial: $200.000.000</li>
             </ul>
           </div>
           <div className="finance-detail-card">
@@ -209,14 +212,14 @@ const FinanzasPage = () => {
         </div>
 
         <div className="finance-detail-card full-width">
-          <h4>Gastos Operativos Mensuales (Una vez operativa la app - Base 5.000 Socios)</h4>
+          <h4>Gastos Operativos Mensuales (Base 5.000 Socios)</h4>
           <p className="finance-total">$116.360.000 ARS / mes</p>
           <ul className="grid-list">
-            <li><strong>Sueldos Talleres (8 personas x 4 sedes + Cargas Sociales 40%):</strong> $75.600.000</li>
-            <li><strong>Sueldos Administración Central (CEO, Contador, Abogado, IT + Cargas):</strong> $11.760.000</li>
-            <li><strong>Alquileres 4 Galpones (CABA/GBA) y Oficina Central:</strong> $14.000.000</li>
-            <li><strong>Servidores Cloud, API Mapas, Pasarelas de pago:</strong> $4.000.000</li>
-            <li><strong>Servicios (Luz industrial, internet, seguros galpones):</strong> $11.000.000</li>
+            <li><strong>Sueldos Talleres + Cargas Sociales:</strong> $75.600.000</li>
+            <li><strong>Sueldos Administración Central + Cargas:</strong> $11.760.000</li>
+            <li><strong>Alquileres 4 Galpones y Oficina:</strong> $14.000.000</li>
+            <li><strong>Servidores Cloud, Mapas, Pasarelas:</strong> $4.000.000</li>
+            <li><strong>Servicios (Luz, internet, seguros):</strong> $11.000.000</li>
           </ul>
         </div>
 
@@ -227,26 +230,26 @@ const FinanzasPage = () => {
             <div className="balance-column haber">
               <h4>HABER (Ingresos Año 1)</h4>
               <p>Aportes 5.000 socios x $30.000 x 12 meses: <strong>$1.800.000.000</strong></p>
-              <p>Intereses estimados (Fondo de inversión conservador): <strong>+$200.000.000</strong></p>
+              <p>Intereses estimados: <strong>+$200.000.000</strong></p>
               <p className="total-balance">Total Ingresos: <strong>$2.000.000.000</strong></p>
             </div>
             <div className="balance-column debe">
               <h4>DEBE (Egresos Año 1)</h4>
-              <p>Inversión Inicial (App, Galpones, Legal): <strong>$238.000.000</strong></p>
+              <p>Inversión Inicial: <strong>$398.000.000</strong></p>
               <p>Marketing Lanzamiento: <strong>$218.000.000</strong></p>
-              <p>Gastos Operativos (6 meses inicial): <strong>$696.000.000</strong></p>
-              <p className="total-balance">Total Egresos: <strong>$1.152.000.000</strong></p>
+              <p>Gastos Operativos (6 meses): <strong>$696.000.000</strong></p>
+              <p className="total-balance">Total Egresos: <strong>$1.312.000.000</strong></p>
             </div>
           </div>
 
           <div className="reserva-box">
             <h4>RESERVA / SALDO A FAVOR DE LA COOPERATIVA A FIN DEL AÑO 1</h4>
-            <p className="reserva-monto">$848.000.000 ARS</p>
-            <p>Este dinero es el respaldo real de la cooperativa para afrontar imprevistos, asegurar la operatividad y comenzar a proyectar la compra de tierras para nuestros centros recreativos.</p>
+            <p className="reserva-monto">$688.000.000 ARS</p>
+            <p>Este dinero es el respaldo real para afrontar imprevistos y proyectar la compra de tierras para nuestros centros recreativos.</p>
           </div>
 
           <div className="chart-wrapper" style={{marginTop: '40px'}}>
-            <h3 className="dark-text">Distribución mensual del 5% de comisión (Operando con 5.000 socios)</h3>
+            <h3 className="dark-text">Distribución mensual del 5% de comisión (5.000 socios)</h3>
             <div style={{ width: '100%', height: 400 }}>
               <ResponsiveContainer>
                 <PieChart>
@@ -260,20 +263,19 @@ const FinanzasPage = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <p className="chart-caption dark-text">De los $625M mensuales que ingresa por el 5%: Se dedican $116M a Gastos Operativos, se reparten $125M entre los socios (20% de ganancias netas), y sobran más de $384M de superávit para expandirnos, mejorar condiciones y construir nuestros centros recreativos.</p>
+            <p className="chart-caption dark-text">De los $625M mensuales: $116M Gastos, $125M Reparto a Socios, $384M Superávit.</p>
           </div>
 
-          {/* NUEVO GRAFICO DE ESCALABILIDAD REALISTA */}
           <div className="chart-wrapper" style={{marginTop: '40px'}}>
-            <h3 className="dark-text">Escalabilidad Realista: Crecen los ingresos, pero también la estructura</h3>
-            <p className="chart-caption dark-text" style={{marginBottom: '20px'}}>Al sumar más socios, los ingresos por comisiones crecen enormemente, pero también debemos ampliar la estructura: más personal en talleres y atención al cliente, más servidores, y más personal para mantener los futuros centros de esparcimiento (caseros, limpieza de piscinas, mantenimiento). Aun así, la rentabilidad neta escala de forma exponencial.</p>
+            <h3 className="dark-text">Escalabilidad Realista: Ingresos vs Estructura</h3>
+            <p className="chart-caption dark-text" style={{marginBottom: '20px'}}>Al sumar socios, crecen los ingresos pero también los gastos (más talleres, personal, servidores, mantenimiento de centros). Igual, la ganancia neta escala exponencialmente.</p>
             <div style={{ width: '100%', height: 400 }}>
               <ResponsiveContainer>
-                <BarChart data={escalabilidadData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={escalabilidadData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="socios" stroke="#333" label={{ value: 'Cantidad de Socios', position: 'insideBottom', offset: -5 }} />
-                  <YAxis stroke="#333" label={{ value: 'Millones $', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip formatter={(value) => `$${value}M`} />
+                  <XAxis dataKey="socios" />
+                  <YAxis />
+                  <Tooltip />
                   <Legend />
                   <Bar dataKey="gastos" fill="#e53e3e" name="Gastos Estructura" radius={[10, 10, 0, 0]} />
                   <Bar dataKey="gananciaNeta" fill="#4fd1c5" name="Ganancia Neta" radius={[10, 10, 0, 0]} />
@@ -284,7 +286,7 @@ const FinanzasPage = () => {
 
           <div className="vision-recreativa">
             <h4>Nuestra Visión a Futuro: Centros Recreativos Propios</h4>
-            <p>Con ese superávit, no solo expandiremos la app a todo el país. Nuestra prioridad es mejorar la calidad de vida real de los socios. Comenzaremos construyendo <strong>Centros Recreativos</strong> en distintas provincias: espacios de esparcimiento con piscinas, zonas de parrillas, juegos para niños, y canchas deportivas (fútbol, pádel, tenis). A mediano plazo, estos centros evolucionarán hacia complejos vacacionales, permitiendo que las vacaciones de los socios y sus familias sean casi gratuitas, y fomentando el intercambio de viviendas entre socios de distintas provincias.</p>
+            <p>Con ese superávit, no solo expandiremos la app a todo el país. Comenzaremos construyendo <strong>Centros Recreativos</strong> en distintas provincias: piscinas, parrillas, juegos para niños, y canchas deportivas (fútbol, pádel, tenis). A mediano plazo, estos centros evolucionarán a complejos vacacionales casi gratuitos para los socios, y fomentaremos el intercambio de viviendas entre socios de distintas provincias.</p>
           </div>
         </div>
       </div>
