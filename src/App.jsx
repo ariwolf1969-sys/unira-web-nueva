@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer, CartesianGrid } from 'recharts';
 import './App.css';
 import logo from './assets/logo.png'; 
+import FormularioSocio from './FormularioSocio'; // CONECTADO AL FORMULARIO
 
 const Navbar = () => (
   <nav className="navbar">
@@ -14,7 +15,7 @@ const Navbar = () => (
       <li><Link to="/">Inicio</Link></li>
       <li><Link to="/acerca">Acerca de</Link></li>
       <li><Link to="/cooperativa">Cooperativa</Link></li>
-      <li><Link to="/finanzas">Finanzas</Link></li>
+      <li><Link to="/finanzas">Finanzas</link></li>
       <li><Link to="/trabaja">Trabaja con Nosotros</Link></li>
       <li><Link to="/contacto">Contacto</Link></li>
     </ul>
@@ -71,7 +72,8 @@ const Inicio = () => {
         </div>
 
         <div className="buttons-container">
-          <Link to="/cooperativa" className="cta-button primary">Unirme a la Cooperativa</Link>
+          {/* BOTON CORREGIDO A POSTULARSE */}
+          <Link to="/postularse" className="cta-button primary">Unirme a la Cooperativa</Link>
           <a href="https://unira.vercel.app/" target="_blank" rel="noopener noreferrer" className="cta-button secondary">Ver App Demo</a>
         </div>
       </div>
@@ -160,6 +162,10 @@ const CooperativaPage = () => {
         <div className="requisitos">
           <h3>¿Cómo ser Socio Fundador?</h3>
           <p>Aporte mensual de <strong>$30.000 ARS (Actualizables por valor UVA)</strong> durante 12 meses. Este aporte te da acceso a la comisión del 5%, talleres mecánicos y de chapa/pintura propios, compras comunitarias, financiamiento y voz y voto en la asamblea. Si no querés ser socio, podés usar la app pagando un 8% de comisión y sin acceso a los beneficios cooperativos.</p>
+          {/* BOTON CORREGIDO A POSTULARSE AQUI TAMBIEN */}
+          <div style={{textAlign: 'center', marginTop: '30px'}}>
+            <Link to="/postularse" className="cta-button primary">Unirme a la Cooperativa</Link>
+          </div>
         </div>
       </div>
     </div>
@@ -345,9 +351,11 @@ function App() {
         <Route path="/" element={<Inicio />} />
         <Route path="/acerca" element={<AcercaDe />} />
         <Route path="/cooperativa" element={<CooperativaPage />} />
-        <Route path="/finanzas" element={<FinanzasPage />} />
+        <Route path="/finanzas" element={<FinanzasasPage />} />
         <Route path="/trabaja" element={<TrabajaConNosotros />} />
         <Route path="/contacto" element={<Contacto />} />
+        {/* RUTA DEL FORMULARIO AGREGADA */}
+        <Route path="/postularse" element={<FormularioSocio />} />
       </Routes>
     </BrowserRouter>
   );
