@@ -32,6 +32,13 @@ function FormularioSocio() {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
+  // Función para limpiar el nombre del archivo y evitar el error de Supabase
+  const cleanFileName = (name, suffix) => {
+    const ext = name.split('.').pop();
+    const cleanName = `${Date.now()}_${suffix}.${ext}`;
+    return cleanName;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!dniFrente || !dniDorso) { setMessage('Debés subir la foto del frente y dorso del DNI.'); return; }
@@ -40,18 +47,15 @@ function FormularioSocio() {
     setMessage('');
 
     try {
-      const fileExtF = dniFrente.name.split('.').pop();
-      const fileNameF = `${Date.now()}_frente.${fileExtF}`;
+      const fileNameF = cleanFileName(dniFrente.name, 'frente');
       const { error: errorF } = await supabase.storage.from('dni-bucket').upload(fileNameF, dniFrente);
       if (errorF) throw errorF;
 
-      const fileExtD = dniDorso.name.split('.').pop();
-      const fileNameD = `${Date.now()}_dorso.${fileExtD}`;
+      const fileNameD = cleanFileName(dniDorso.name, 'dorso');
       const { error: errorD } = await supabase.storage.from('dni-bucket').upload(fileNameD, dniDorso);
       if (errorD) throw errorD;
 
       const dataToInsert = { ...formData };
-      // Convertir arrays a texto separado por comas para la base de datos
       Object.keys(dataToInsert).forEach(key => {
         if (Array.isArray(dataToInsert[key])) {
           dataToInsert[key] = dataToInsert[key].join(', ');
@@ -68,7 +72,7 @@ function FormularioSocio() {
       if (insertError) throw insertError;
 
       setMessage('¡Registro exitoso! Revisaremos tu DNI y nos pondremos en contacto.');
-      setStep(6); // Paso de éxito
+      setStep(6);
     } catch (error) {
       setMessage('Error al enviar: ' + error.message);
     } finally {
@@ -90,13 +94,16 @@ function FormularioSocio() {
           <div className={`progress-step ${step >= 5 ? 'active' : ''}`}>5. Compromiso</div>
         </div>
 
-        <div className="info-block">
+        <div className="form-container-box">
           <form onSubmit={handleSubmit}>
             
             {/* PASO 1: IDENTIDAD Y DNI */}
             {step === 1 && (
               <div className="form-step">
-                <h3>Sección 1 — Datos Básicos y Verificación</h3>
+                <div className="step-header">
+                  <h3>Sección 1 — Datos Básicos y Verificación</h3>
+                  <span className="step-percent">Paso 1 de 5 (20%)</span>
+                </div>
                 <div className="form-group"><label>Nombres y Apellidos *</label><input type="text" name="nombre" value={formData.nombre} onChange={handleChange} required /></div>
                 <div className="grid-2" style={{gap: '20px'}}>
                   <div className="form-group"><label>Teléfono (WhatsApp) *</label><input type="tel" name="telefono" value={formData.telefono} onChange={handleChange} required /></div>
@@ -108,17 +115,20 @@ function FormularioSocio() {
                 </div>
                 <div className="form-group"><label>Nacionalidad *</label><input type="text" name="nacionalidad" value={formData.nacionalidad} onChange={handleChange} required /></div>
                 <div className="grid-2" style={{gap: '20px'}}>
-                  <div className="form-group"><label>Foto DNI Frente * (Verificación)</label><input type="file" accept="image/*" onChange={(e) => setDniFrente(e.target.files[0])} required /></div>
-                  <div className="form-group"><label>Foto DNI Dorso * (Verificación)</label><input type="file" accept="image/*" onChange={(e) => setDniDorso(e.target.files[0])} required /></div>
+                  <div className="form-group"><label>Foto DNI Frente * (Verificación)</label><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setDniFrente(e.target.files[0])} required /></div>
+                  <div className="form-group"><label>Foto DNI Dorso * (Verificación)</label><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setDniDorso(e.target.files[0])} required /></div>
                 </div>
-                <div style={{textAlign: 'right', marginTop: '20px'}}><button type="button" className="cta-button primary" onClick={nextStep}>Siguiente</button></div>
+                <div style={{textAlign: 'right', marginTop: '30px'}}><button type="button" className="cta-button primary" onClick={nextStep}>Siguiente</button></div>
               </div>
             )}
 
             {/* PASO 2: PERFIL CONDUCTOR */}
             {step === 2 && (
               <div className="form-step">
-                <h3>Sección 2 — Perfil del Conductor</h3>
+                <div className="step-header">
+                  <h3>Sección 2 — Perfil del Conductor</h3>
+                  <span className="step-percent">Paso 2 de 5 (40%)</span>
+                </div>
                 <div className="form-group">
                   <label>¿Qué vehículo/s utilizás? *</label>
                   <div className="checkbox-group">
@@ -142,7 +152,7 @@ function FormularioSocio() {
                 <div className="form-group"><label>Nivel de Estudios alcanzados / Conocimientos *</label><input type="text" name="nivel_estudios" value={formData.nivel_estudios} onChange={handleChange} required /></div>
                 <div className="form-group"><label>Profesión... (Ej: Electricista - Chofer - Desarrollador) *</label><input type="text" name="profesion" value={formData.profesion} onChange={handleChange} required /></div>
                 <div className="form-group"><label>Idiomas? *</label><input type="text" name="idiomas" value={formData.idiomas} onChange={handleChange} required /></div>
-                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '20px'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '30px'}}>
                   <button type="button" className="cta-button secondary" onClick={prevStep} style={{color: '#333', borderColor: '#ccc'}}>Anterior</button>
                   <button type="button" className="cta-button primary" onClick={nextStep}>Siguiente</button>
                 </div>
@@ -152,7 +162,10 @@ function FormularioSocio() {
             {/* PASO 3: INGRESOS Y SITUACION */}
             {step === 3 && (
               <div className="form-step">
-                <h3>Sección 3 — Ingresos y Situación</h3>
+                <div className="step-header">
+                  <h3>Sección 3 — Ingresos y Situación</h3>
+                  <span className="step-percent">Paso 3 de 5 (60%)</span>
+                </div>
                 <div className="form-group">
                   <label>¿Cuántas horas trabajás por día? *</label>
                   <select name="horas_dia" value={formData.horas_dia} onChange={handleChange} required>
@@ -193,7 +206,7 @@ function FormularioSocio() {
                   </div>
                 </div>
                 <div className="form-group"><label>¿Qué otro problema estás teniendo?</label><input type="text" name="otro_problema" value={formData.otro_problema} onChange={handleChange} /></div>
-                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '20px'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '30px'}}>
                   <button type="button" className="cta-button secondary" onClick={prevStep} style={{color: '#333', borderColor: '#ccc'}}>Anterior</button>
                   <button type="button" className="cta-button primary" onClick={nextStep}>Siguiente</button>
                 </div>
@@ -203,7 +216,10 @@ function FormularioSocio() {
             {/* PASO 4: EXPERIENCIA Y SEGURIDAD */}
             {step === 4 && (
               <div className="form-step">
-                <h3>Sección 4 — Experiencia Real y Seguridad</h3>
+                <div className="step-header">
+                  <h3>Sección 4 — Experiencia Real y Seguridad</h3>
+                  <span className="step-percent">Paso 4 de 5 (80%)</span>
+                </div>
                 <div className="form-group">
                   <label>¿Qué tan seguro te sentís trabajando con UBER? *</label>
                   <select name="seguridad_uber" value={formData.seguridad_uber} onChange={handleChange} required><option value="">Seleccionar...</option><option value="Muy seguro">Muy seguro</option><option value="Bastante seguro">Bastante seguro</option><option value="Poco seguro">Poco seguro</option><option value="Nada seguro">Nada seguro</option></select>
@@ -220,16 +236,18 @@ function FormularioSocio() {
                   <label>¿Qué tan seguro te sentís trabajando con INDRIVE? *</label>
                   <select name="seguridad_indrive" value={formData.seguridad_indrive} onChange={handleChange} required><option value="">Seleccionar...</option><option value="Muy seguro">Muy seguro</option><option value="Bastante seguro">Bastante seguro</option><option value="Poco seguro">Poco seguro</option><option value="Nada seguro">Nada seguro</option></select>
                 </div>
-                <div className="form-group"><label>¿Qué situaciones de inseguridad viviste o te preocupan?</label><textarea name="situaciones_inseguridad" rows="3" value={formData.situaciones_inseguridad} onChange={handleChange} style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e0'}}></textarea></div>
+                <div className="form-group"><label>¿Qué situaciones de inseguridad viviste o te preocupan?</label><textarea name="situaciones_inseguridad" rows="3" value={formData.situaciones_inseguridad} onChange={handleChange} style={{width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e0'}}></textarea></div>
                 
-                <h4 style={{marginTop: '20px'}}>⏱️ Tiempo perdido</h4>
+                <div className="step-header" style={{marginTop: '40px'}}>
+                  <h4>⏱️ Tiempo perdido</h4>
+                </div>
                 <div className="form-group">
                   <label>¿Cuánto te afecta que los pasajeros demoren en subir al vehículo? *</label>
                   <select name="tiempo_perdido" value={formData.tiempo_perdido} onChange={handleChange} required><option value="">Seleccionar...</option><option value="Mucho">Mucho</option><option value="Bastante">Bastante</option><option value="Poco">Poco</option><option value="Nada">Nada</option></select>
                 </div>
                 <div className="form-group"><label>¿Qué solución te gustaría para este problema?</label><input type="text" name="solucion_tiempo" value={formData.solucion_tiempo} onChange={handleChange} /></div>
                 
-                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '20px'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '30px'}}>
                   <button type="button" className="cta-button secondary" onClick={prevStep} style={{color: '#333', borderColor: '#ccc'}}>Anterior</button>
                   <button type="button" className="cta-button primary" onClick={nextStep}>Siguiente</button>
                 </div>
@@ -239,8 +257,14 @@ function FormularioSocio() {
             {/* PASO 5: COMPROMISO Y APP */}
             {step === 5 && (
               <div className="form-step">
-                <h3>Sección 5 — Interés, Compromiso y Mejoras</h3>
+                <div className="step-header">
+                  <h3>Sección 5 — Interés, Compromiso y Mejoras</h3>
+                  <span className="step-percent">Paso 5 de 5 (100%)</span>
+                </div>
                 
+                <div className="step-header" style={{marginTop: '20px'}}>
+                  <h4>💡 Funciones de la app</h4>
+                </div>
                 <div className="form-group">
                   <label>📍 ¿Te gustaría poder elegir la distancia máxima para buscar pasajeros? *</label>
                   <select name="distancia_busqueda" value={formData.distancia_busqueda} onChange={handleChange} required><option value="">Seleccionar...</option><option value="Si">Si</option><option value="No">No</option><option value="Me da igual">Me da igual</option></select>
@@ -266,7 +290,9 @@ function FormularioSocio() {
                   <select name="votar_decisiones" value={formData.votar_decisiones} onChange={handleChange} required><option value="">Seleccionar...</option><option value="Si">Si</option><option value="No">No</option></select>
                 </div>
 
-                <h4 style={{marginTop: '20px'}}>Interés y Compromiso</h4>
+                <div className="step-header" style={{marginTop: '40px'}}>
+                  <h4>🤝 Interés y Compromiso</h4>
+                </div>
                 <div className="form-group">
                   <label>¿Te interesaría participar en una app con solo 5% de comisión? *</label>
                   <select name="interes_5" value={formData.interes_5} onChange={handleChange} required><option value="">Seleccionar...</option><option value="Si">Si</option><option value="No">No</option><option value="Quiero mas info">Quiero más información</option></select>
@@ -283,9 +309,9 @@ function FormularioSocio() {
                   <label>¿Cuándo estarías dispuesto a comenzar? *</label>
                   <select name="cuando_comenzar" value={formData.cuando_comenzar} onChange={handleChange} required><option value="">Seleccionar...</option><option value="Inmediatamente">Inmediatamente</option><option value="En 1 mes">En 1 mes</option><option value="Mas adelante">Más adelante</option><option value="Solo estoy evaluando">Solo estoy evaluando</option></select>
                 </div>
-                <div className="form-group"><label>¿Qué necesitás entender mejor o qué dudas tenés?</label><textarea name="dudas" rows="3" value={formData.dudas} onChange={handleChange} style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e0'}}></textarea></div>
+                <div className="form-group"><label>¿Qué necesitás entender mejor o qué dudas tenés?</label><textarea name="dudas" rows="3" value={formData.dudas} onChange={handleChange} style={{width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e0'}}></textarea></div>
 
-                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '20px'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '30px'}}>
                   <button type="button" className="cta-button secondary" onClick={prevStep} style={{color: '#333', borderColor: '#ccc'}}>Anterior</button>
                   <button type="submit" className="cta-button primary" disabled={loading}>
                     {loading ? 'Enviando y verificando...' : 'Enviar Solicitud Completa'}
