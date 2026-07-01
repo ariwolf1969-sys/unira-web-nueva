@@ -15,7 +15,7 @@ const Navbar = () => (
       <li><Link to="/">Inicio</Link></li>
       <li><Link to="/acerca">Acerca de</Link></li>
       <li><Link to="/cooperativa">Cooperativa</Link></li>
-      <li><Link to="/finanzas">Finanzas</link></li>
+      <li><Link to="/finanzas">Finanzas</Link></li>
       <li><Link to="/trabaja">Trabaja con Nosotros</Link></li>
       <li><Link to="/contacto">Contacto</Link></li>
     </ul>
@@ -351,7 +351,7 @@ function App() {
         <Route path="/" element={<Inicio />} />
         <Route path="/acerca" element={<AcercaDe />} />
         <Route path="/cooperativa" element={<CooperativaPage />} />
-        <Route path="/finanzas" element={<FinanzasasPage />} />
+        <Route path="/finanzas" element={<FinanzasPage />} />
         <Route path="/trabaja" element={<TrabajaConNosotros />} />
         <Route path="/contacto" element={<Contacto />} />
         {/* RUTA DEL FORMULARIO AGREGADA */}
