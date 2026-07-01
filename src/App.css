@@ -64,7 +64,7 @@
 .dark-text { color: #1a202c !important; }
 
 /* HERO INICIO */
-.hero-content { max-width: 1200px; margin: 0 auto; }
+.hero-content { max-width: 1800px; margin: 0 auto; width: 100%;}
 .logos-container { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 40px; }
 .hero-logo { width: 140px; mix-blend-mode: screen; }
 .teyevo-placeholder { font-size: 3rem; font-weight: 900; background: linear-gradient(90deg, #4fd1c5, #3182ce); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
