@@ -29,12 +29,10 @@ function FormularioSocio() {
     }
   };
 
-  // Esto hace que la página suba al cambiar de paso
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [step]);
 
-  // Validación real de los campos obligatorios al querer pasar de paso
   const nextStep = () => {
     const invalidInputs = document.querySelectorAll('.form-step input:invalid, .form-step select:invalid, .form-step textarea:invalid');
     if (invalidInputs.length > 0) {
@@ -46,6 +44,15 @@ function FormularioSocio() {
 
   const prevStep = () => setStep(step - 1);
 
+  // Función para limpiar el nombre y usarlo en el archivo de la foto
+  const sanitizeName = (name) => {
+    return name
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita tildes
+      .replace(/[^a-zA-Z0-9 ]/g, "") // Quita caracteres raros
+      .replace(/\s+/g, '_') // Espacios por guiones bajos
+      .toLowerCase();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!dniFrente || !dniDorso) { setMessage('Debés subir la foto del frente y dorso del DNI.'); return; }
@@ -54,14 +61,22 @@ function FormularioSocio() {
     setMessage('');
 
     try {
-      // Forzamos un nombre de archivo puramente numérico para evitar el error de URL de Supabase
-      const fileNameF = `${Date.now()}_frente.jpg`;
+      // Creamos un nombre de archivo basado en el nombre de la persona
+      const nombreLimpio = sanitizeName(formData.nombre || 'sin_nombre');
+      const fileNameF = `${Date.now()}_${nombreLimpio}_frente.jpg`;
+      const fileNameD = `${Date.now()}_${nombreLimpio}_dorso.jpg`;
+
+      // Subir Frente
       const { error: errorF } = await supabase.storage.from('dni-bucket').upload(fileNameF, dniFrente);
       if (errorF) throw errorF;
 
-      const fileNameD = `${Date.now()}_dorso.jpg`;
+      // Subir Dorso
       const { error: errorD } = await supabase.storage.from('dni-bucket').upload(fileNameD, dniDorso);
       if (errorD) throw errorD;
+
+      // Obtener los enlaces públicos de las fotos para guardarlos en la tabla
+      const { data: urlDataF } = supabase.storage.from('dni-bucket').getPublicUrl(fileNameF);
+      const { data: urlDataD } = supabase.storage.from('dni-bucket').getPublicUrl(fileNameD);
 
       const dataToInsert = { ...formData };
       Object.keys(dataToInsert).forEach(key => {
@@ -70,10 +85,11 @@ function FormularioSocio() {
         }
       });
 
+      // Guardar en la base de datos con los ENLACES de las fotos
       const { error: insertError } = await supabase.from('socios_potenciales').insert([{
         ...dataToInsert,
-        dni_frente_url: fileNameF, 
-        dni_dorso_url: fileNameD, 
+        dni_frente_url: urlDataF.publicUrl, // Enlace clickeable
+        dni_dorso_url: urlDataD.publicUrl,  // Enlace clickeable
         verificado: false
       }]);
       
